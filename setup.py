@@ -4,9 +4,11 @@ import platform, warnings
 #Pypy dependency support
 python_implementation = platform.python_implementation()
 
-install_requires = ['sqlalchemy', 'pymysql', 'psycopg2',]
+#install_requires = ['sqlalchemy', 'pymysql', 'psycopg2',]
+install_requires = ['sqlalchemy',]
 if python_implementation == "PyPy":
-    install_requires = ['sqlalchemy', 'pymysql', 'psycopg2cffi',]
+    #install_requires = ['sqlalchemy', 'pymysql', 'psycopg2cffi',]
+    install_requires = ['sqlalchemy',] 
 elif python_implementation != "CPython":
     warnings.warn("We don't know how to deal with the {} runtime. Treating it like CPython".format(python_implementation), RuntimeWarning)
 
