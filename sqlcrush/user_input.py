@@ -69,6 +69,43 @@ def cursor_up(cursor, vert_list, scr_dim, cursor_other):
 
     return cursor
 
+def page_down(cursor, vert_list, scr_dim, cursor_other):
+
+    max_list_length = len(vert_list)
+
+    if cursor[0] + cursor[1] < max_list_length:
+        cursor[0] = cursor[0] + scr_dim - 1
+
+    if cursor_other[2] == 1:
+        if cursor[0] > scr_dim[0] - 9:
+            cursor[0] = cursor[0] - 1
+            cursor[1] = cursor[1] + 1
+    else:
+        if cursor[0] > scr_dim[0] - 10:
+            cursor[0] = cursor[0] - 1
+            cursor[1] = cursor[1] + 1
+
+    return cursor
+
+
+def page_up(cursor, vert_list, scr_dim, cursor_other):
+
+    if cursor[0] > 0:
+        cursor[0] = cursor[0] - 1
+    if cursor_other[2] == 1:
+        if cursor[0] == 1 and cursor[1] != 1 and cursor[1] != 0:
+            cursor[0] = 2
+            cursor[1] = cursor[1] - 1
+        if cursor[0] == 1 and cursor[1] == 1:
+            cursor[1] = 0
+    else:
+        if cursor[0] == 0 and cursor[1] != 0:
+            cursor[0] = 1
+            cursor[1] = cursor[1] - 1
+
+    return cursor
+
+
 def update_cell(scr_dim, original):
 
     #curses.start_color()

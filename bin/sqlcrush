@@ -89,7 +89,7 @@ def open_front_main(scr_dim):
         scr_front_main.addstr(17, 2, "[s] Save database")
 
         if scr_dim[0] > 25:
-            scr_front_main.addstr(19, 2, "Thank you for using SQLcrush. This was made to allow SQL")
+            scr_front_main.addstr(19, 2, "Thank you for using SQLcrush! This was made to allow SQL")
             scr_front_main.addstr(20, 2, "database manipulation to be done right in the console.")
 
     else:
@@ -774,7 +774,7 @@ while x != ord("q"):        # quit on [q]
                 if open_window == 1:
                     open_window = 0
                     show_query = 0
-            if x == 102 and show_query != 1:        # f
+            if x == ord( "f" ) and show_query != 1:        # f
                 if open_window == 1 and cursor_main[2] == 1:
                     if len(find_list) == 0:
                         find_list = database.find_database_entry(cursor_main, cursor_sub, columns, shown_tables, current_table, scr_bottom, scr_dim)
@@ -782,7 +782,7 @@ while x != ord("q"):        # quit on [q]
                     else:
                         find_list = []
                         cursor_sub = [0, 0, 0, 0]
-            if x == 100 and show_query != 1 and current_screen == 2:        # d
+            if x == ord( "d" ) and show_query != 1 and current_screen == 2:        # d
                 if open_window == 1 and cursor_main[2] == 1 and cursor_sub[1] + cursor_sub[0] > 1 and cursor_sub[2] == 0:
                     current_table = database.get_table(shown_tables[cursor_main[0] + cursor_main[1] - 1], open_database, database_dir)
                     table_executions = database.delete_database_entry(cursor_main, cursor_sub, columns, shown_tables, current_table, open_database, scr_bottom, table_executions, current_real_database, current_database, find_list)
@@ -803,7 +803,7 @@ while x != ord("q"):        # quit on [q]
                                 find_list.remove(find_list[n])
                             n = n + 1
                 updatedData = 1
-            elif x == 100 and current_screen == 3:
+            elif x == ord( "d" ) and current_screen == 3:
                 database.delete_fav_query(cursor_main)
                 cursor_main[0] = cursor_main[0] - 1
 
@@ -818,12 +818,12 @@ while x != ord("q"):        # quit on [q]
                     else:
                         cursor_sub[0] = cursor_sub[0] - 1
                 updatedData = 1
-            if x == 117 and show_query != 1:        # u
+            if x == ord( "u" ) and show_query != 1:        # u
                 if open_window == 1 and cursor_main[2] == 1 and cursor_sub[1] + cursor_sub[0] > 1 and cursor_sub[2] + cursor_sub[3] > 0:
                     table_executions = database.update_database_cell(cursor_main, cursor_sub, columns, shown_tables, current_table, open_database, scr_bottom, scr_dim, table_executions, find_list)
                     updatedData = 1
 
-            if x == 110 and show_query != 1:        # n
+            if x == ord( "n" ) and show_query != 1:        # n
                 if open_window == 1 and cursor_main[2] == 2:
                     scr_show_main.addstr(1, 1, "New SQL execution:", curses.A_REVERSE)
                     scr_show_main.refresh()
@@ -834,7 +834,7 @@ while x != ord("q"):        # quit on [q]
                     updatedData = 1
                 if current_screen == 3:
                     query_state = 1
-            if x == 261 and (cursor_sub != [0, 0, 0, 0] or show_query != 1):        # right
+            if x == curses.KEY_RIGHT and (cursor_sub != [0, 0, 0, 0] or show_query != 1):        # right
                 if open_window == 1:
                     if cursor_sub[0] + cursor_sub[1] == 0:
                         cursor_main = user_input.cursor_right(cursor_main, header_list, scr_dim)
@@ -853,7 +853,7 @@ while x != ord("q"):        # quit on [q]
                 if open_window == 1:
                     cursor_main = user_input.cursor_left(cursor_main, header_list, scr_dim)
                     cursor_sub = [0, 0, 0, 0]
-            elif x == 260 and (cursor_sub != [0, 0, 0, 0] or show_query != 1):     # left
+            elif x == curses.KEY_LEFT and (cursor_sub != [0, 0, 0, 0] or show_query != 1):     # left
                 if open_window == 1:
                     if cursor_sub[0] + cursor_sub[1] == 0:
                         cursor_main = user_input.cursor_left(cursor_main, header_list, scr_dim)
@@ -862,7 +862,7 @@ while x != ord("q"):        # quit on [q]
                         cursor_sub = user_input.cursor_left(cursor_sub, columns, scr_dim)
                 else:
                     pass
-            elif x == 258:      # down
+            elif x == curses.KEY_DOWN:      # down
                 if open_window == 0 and current_screen == 2:
                     cursor_main = user_input.cursor_down(cursor_main, open_list, scr_dim, cursor_sub)
                     cursor_sub = [0, 0, 0, 0]
@@ -880,7 +880,7 @@ while x != ord("q"):        # quit on [q]
                     cursor_sub = user_input.cursor_down(cursor_sub, executions_list, scr_dim, cursor_main)
                 else:
                     cursor_sub = user_input.cursor_down(cursor_sub, open_list, scr_dim, cursor_main)
-            elif x == 259:      # up
+            elif x == curses.KEY_UP:      # up
                 if open_window == 0:
                     cursor_main = user_input.cursor_up(cursor_main, open_list, scr_dim, cursor_sub)
                     cursor_sub = [0, 0, 0, 0]
@@ -890,10 +890,10 @@ while x != ord("q"):        # quit on [q]
                     cursor_sub = user_input.cursor_up(cursor_sub, entry_list, scr_dim, cursor_main)
                 else:
                     cursor_sub = user_input.cursor_up(cursor_sub, open_list, scr_dim, cursor_main)
-            elif x == 115:         # s
+            elif x == ord( "s" ):         # s
                 if saved_database == 0 and current_database != 0:
                     database.save_database_to_file(dbname, user, host, password, port, database_type, scr_dim, scr_bottom)
-            elif x == 104:      # h
+            elif x == ord( "h" ):      # h
                 if current_database != 0 and current_database != 1:
                     if current_screen == 1:
                         current_screen = 2
@@ -901,7 +901,7 @@ while x != ord("q"):        # quit on [q]
                         current_screen = 1
                     elif current_screen == 2:
                         current_screen = 1
-            elif x == 107:      # k
+            elif x == ord( "k" ):      # k
                 if current_database != 0 and current_database != 1:
                     if current_screen == 3:
                         current_screen = 2
@@ -919,7 +919,7 @@ while x != ord("q"):        # quit on [q]
                         current_screen = 2
                         query_state = 0
 
-        elif x == 104:      # h
+        elif x == ord( "h" ):
             if current_screen == 1 and current_database != 0 and current_database != 1:
                 current_screen = 2
             elif current_screen == 2:
