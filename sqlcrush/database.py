@@ -13,10 +13,6 @@ from sqlcrush import user_input
 
 ## FUNCTIONS ##
 
-def print_intro():
-
-    print("Initializing...")
-
 def connect_database(n, current_real_database, dbname, user, host, password, port, socket, database_type, saved_database):
 
     database_dir = 0
