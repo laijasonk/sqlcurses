@@ -3,8 +3,8 @@
 ## PyPy Support ##
 import platform
 #if platform.python_implementation() == "PyPy":
-#    from psycopg2cffi import compat
-#    compat.register()
+#   from psycopg2cffi import compat
+#   compat.register()
 
 ## IMPORTS ##
 import curses
@@ -23,9 +23,19 @@ last_x = 0
 term_size_change = False
 option_window_open = False
 
-## FUNCTIONS ##
-#initialize the curses window and return scr
+
+
+##################################################
+#
+# FUNCTIONS 
+#
+##################################################
+
 def init_scr():
+
+    """ Initialize the curses window and return scr
+
+    """
 
     scr = curses.initscr()
 
@@ -33,32 +43,41 @@ def init_scr():
     curses.cbreak()
     curses.curs_set(0)
     curses.halfdelay(1)
-    scr.keypad(True)
+    scr.keypad( True )
     scr.clear()
 
     return scr
 
-#user scr to terminate the window and revert back to terminal
-def term_scr(scr):
+
+def term_scr( scr ):
+    
+    """ User scr to terminate the window and revert back to terminal
+
+    :param scr: Screen object from curses initscr
+
+    """
 
     curses.nocbreak()
-    scr.keypad(False)
+    scr.keypad( False )
     curses.echo()
     curses.endwin()
 
-#returns the number of columns or rows
-def get_scr_dim(scr):
-    return scr.getmaxyx()
 
-#returns True if there has been a change in the window size, otherwise False
-def check_term_size_change(scr, scr_dim):
+def check_term_size_change( scr, scr_dim ):
 
-    change = False
+    """ Checks if change in window size
+    
+    :param scr: Screen object from curses initscr
+    :param scr_dim: Dimensions to check
+    :return: True for change, False for no change
+
+    """
 
     if scr_dim != scr.getmaxyx():
-        change = True
+        return True
 
-    return change
+    return False
+
 
 def open_top_bar(scr_dim):
 
@@ -184,11 +203,17 @@ def create_environment():
             f.write(auto_content)
             f.close()
 
-## WORKFLOW ##
+
+##################################################
+#
+# WORKFLOW 
+#
+##################################################
+
 create_environment()
 
 scr = init_scr()
-scr_dim = get_scr_dim(scr)
+scr_dim = scr.getmaxyx()
 
 # declarations
 cursor_main = [0, 0, 0, 0]
@@ -211,7 +236,7 @@ current_real_database = 0
 database_dir = 0
 query_state = 0
 show_query = 0
-updatedData = 1                 # if 1, gets new database information
+updatedData = 1 # if 1, gets new database information
 
 # Based on what the user inputs
 if len(sys.argv) == 1:
@@ -290,17 +315,19 @@ while n < 3:
         if n == 3:
             current_screen = 1
             current_database = 0
+
+
 #main loop
-while x != ord("q"):        # quit on [q]
+while x != ord( "q" ): # quit on "q"
     try:
         # check to see if there is a change in terminal size
         term_size_change = check_term_size_change(scr, scr_dim)
         if term_size_change == True:
             term_scr(scr)
             scr = init_scr()
-            scr_dim = get_scr_dim(scr)
+            scr_dim = scr.getmaxyx()
             term_size_change == False
-        scr_dim = get_scr_dim(scr)
+        scr_dim = scr.getmaxyx()
 
         scr_top = open_top_bar(scr_dim)
         scr_front_main = open_front_main(scr_dim)
@@ -923,10 +950,12 @@ while x != ord("q"):        # quit on [q]
                 current_screen = 2
             elif current_screen == 2:
                 current_screen = 1
-    except:
+    except Exception as e:
         term_scr(scr)
         print("CRITICAL FAILURE...")
-        time.sleep(2)
+        import traceback
+        traceback.print_exc()
+        print( e )
         break
     #terminating the window
 try:
