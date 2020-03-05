@@ -12,15 +12,15 @@ if python_implementation == "PyPy":
 elif python_implementation != "CPython":
     warnings.warn("We don't know how to deal with the {} runtime. Treating it like CPython".format(python_implementation), RuntimeWarning)
 
-setup(name='sqlcrush',
+setup(name='sqlcurses',
         version='0.1.5',
         description='console based database editor',
-        url='http://github.com/coffeeandscripts/sqlcrush',
-        author='coffeeandscripts',
-        author_email='ersari94@gmail.com',
+        url='http://github.com/laijsonk/sqlcurses',
+        author='Jason K Lai',
+        author_email='laijasonk@gmail.com',
         license='GNU',
-        scripts=['bin/sqlcrush',],
-        packages=['sqlcrush',],
+        scripts=['bin/sqlcurses',],
+        packages=['sqlcurses',],
         install_requires=install_requires,
         include_package_data=True
 )
