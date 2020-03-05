@@ -67,8 +67,8 @@ def check_term_size_change( scr, scr_dim ):
 
     """ Checks if change in window size
     
-    :param scr: Screen object from curses initscr
-    :param scr_dim: Dimensions to check
+    :param scr: screen object from curses initscr
+    :param scr_dim: dimensions to check
     :return: True for change, False for no change
 
     """
@@ -79,9 +79,17 @@ def check_term_size_change( scr, scr_dim ):
     return False
 
 
-def open_top_bar(scr_dim):
+def open_top_bar( scr_dim ):
 
-    scr_top = curses.newwin(4, scr_dim[1], 0, 0)
+    """ Create and return the top bar 
+
+    :param scr_dim: dimensions of the screen
+    :return: curses window object for the top bar
+
+    """
+
+    # format: curses.newwin(nlines, ncols, begin_y, begin_x)
+    scr_top = curses.newwin( 4, scr_dim[1], 0, 0 )
 
     return scr_top
 
