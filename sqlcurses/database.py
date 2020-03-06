@@ -13,7 +13,19 @@ from sqlcurses import user_input
 
 ## FUNCTIONS ##
 
-def connect_database(n, current_real_database, dbname, user, host, password, port, socket, database_type, saved_database):
+
+def connect_database(
+    n,
+    current_real_database,
+    dbname,
+    user,
+    host,
+    password,
+    port,
+    socket,
+    database_type,
+    saved_database,
+):
 
     database_dir = 0
 
@@ -37,7 +49,7 @@ def connect_database(n, current_real_database, dbname, user, host, password, por
     else:
         root_path = os.path.expanduser("~")
         f = open(root_path + "/.sqlcurses/saved_databases", "r")
-        
+
         saved_dbs = f.readlines()
         f.close()
         length_save_name = len(saved_database)
@@ -58,7 +70,10 @@ def connect_database(n, current_real_database, dbname, user, host, password, por
 
     return open_database
 
-def save_database_to_file(dbname, user, host, password, port, database_type, scr_dim, scr_bottom):
+
+def save_database_to_file(
+    dbname, user, host, password, port, database_type, scr_dim, scr_bottom
+):
 
     root_path = os.path.expanduser("~")
 
@@ -81,18 +96,34 @@ def save_database_to_file(dbname, user, host, password, port, database_type, scr
     with open(root_path + "/.sqlcurses/saved_databases", "a") as f:
         f.write(database_save)
 
+
 def get_table(table_name, open_database, database_dir):
 
     if database_dir != 0:
         os.chidir(database_dir)
 
-    current_table = {table_name:{}}
+    current_table = {table_name: {}}
     with open_database.connect() as conn:
-        current_table[table_name] = conn.execute('SELECT * FROM %s' % table_name).fetchall()
+        current_table[table_name] = conn.execute(
+            "SELECT * FROM %s" % table_name
+        ).fetchall()
 
     return current_table
 
-def delete_database_entry(cursor_main, cursor_sub, columns, shown_tables, current_table, open_database, scr_bottom, table_executions, current_real_database, current_database, find_list):
+
+def delete_database_entry(
+    cursor_main,
+    cursor_sub,
+    columns,
+    shown_tables,
+    current_table,
+    open_database,
+    scr_bottom,
+    table_executions,
+    current_real_database,
+    current_database,
+    find_list,
+):
 
     n = 0
 
@@ -105,54 +136,24 @@ def delete_database_entry(cursor_main, cursor_sub, columns, shown_tables, curren
             n = n + 1
 
     if find_list != []:
-        current_entry_primary_key_id = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][find_list[cursor_sub[0] + cursor_sub[1] - 2]][current_entry_primary_key]
+        current_entry_primary_key_id = current_table[
+            shown_tables[cursor_main[0] + cursor_main[1] - 1]
+        ][find_list[cursor_sub[0] + cursor_sub[1] - 2]][current_entry_primary_key]
     else:
-        current_entry_primary_key_id = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][cursor_sub[0] + cursor_sub[1] - 2][current_entry_primary_key]
+        current_entry_primary_key_id = current_table[
+            shown_tables[cursor_main[0] + cursor_main[1] - 1]
+        ][cursor_sub[0] + cursor_sub[1] - 2][current_entry_primary_key]
 
-    sql_command = "DELETE from " + str(shown_tables[cursor_main[0] + cursor_main[1] - 1]) + " WHERE " + str(current_entry_primary_key_name) + "=" + str(current_entry_primary_key_id)
+    sql_command = (
+        "DELETE from "
+        + str(shown_tables[cursor_main[0] + cursor_main[1] - 1])
+        + " WHERE "
+        + str(current_entry_primary_key_name)
+        + "="
+        + str(current_entry_primary_key_id)
+    )
 
     scr_bottom.addstr(1, 1, str(sql_command))
-
-    scr_bottom.refresh()
-
-    time.sleep(1)
-    
-    try:
-        Session = sessionmaker(bind=open_database)
-        conn = Session()
-        conn.execute(sql_command)
-        conn.commit()
-        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(sql_command)
-
-    except:
-        scr_bottom.clear()
-        scr_bottom.addstr(1, 1, "Delete failed")
-        scr_bottom.refresh()
-        time.sleep(1)
-
-    return table_executions
-
-def delete_database_cell(cursor_main, cursor_sub, columns, shown_tables, current_table, open_database, scr_bottom, table_executions, find_list):
-
-    n = 0
-
-    for column in columns:
-        if column[5] == 1:
-            current_entry_primary_key = n
-            current_entry_primary_key_name = column[1]
-            break
-        else:
-            n = n + 1
-
-    if find_list != []:
-        current_entry_primary_key_id = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][find_list[cursor_sub[0] + cursor_sub[1] - 2]][current_entry_primary_key]
-    else:
-        current_entry_primary_key_id = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][cursor_sub[0] + cursor_sub[1] - 2][current_entry_primary_key]
-
-    sql_command = "UPDATE " + str(shown_tables[cursor_main[0] + cursor_main[1] - 1]) + " SET " + str(columns[cursor_sub[2] + cursor_sub[3] - 1][1]) + " = " + "NULL" + " WHERE " + str(current_entry_primary_key_name) + "=" + str(current_entry_primary_key_id)
-
-    scr_bottom.addstr(1, 1, str(sql_command))
-    table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(str(sql_command))
 
     scr_bottom.refresh()
 
@@ -163,7 +164,10 @@ def delete_database_cell(cursor_main, cursor_sub, columns, shown_tables, current
         conn = Session()
         conn.execute(sql_command)
         conn.commit()
-        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(str(sql_command))
+        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(
+            sql_command
+        )
+
     except:
         scr_bottom.clear()
         scr_bottom.addstr(1, 1, "Delete failed")
@@ -172,7 +176,89 @@ def delete_database_cell(cursor_main, cursor_sub, columns, shown_tables, current
 
     return table_executions
 
-def update_database_cell(cursor_main, cursor_sub, columns, shown_tables, current_table, open_database, scr_bottom, scr_dim, table_executions, find_list):
+
+def delete_database_cell(
+    cursor_main,
+    cursor_sub,
+    columns,
+    shown_tables,
+    current_table,
+    open_database,
+    scr_bottom,
+    table_executions,
+    find_list,
+):
+
+    n = 0
+
+    for column in columns:
+        if column[5] == 1:
+            current_entry_primary_key = n
+            current_entry_primary_key_name = column[1]
+            break
+        else:
+            n = n + 1
+
+    if find_list != []:
+        current_entry_primary_key_id = current_table[
+            shown_tables[cursor_main[0] + cursor_main[1] - 1]
+        ][find_list[cursor_sub[0] + cursor_sub[1] - 2]][current_entry_primary_key]
+    else:
+        current_entry_primary_key_id = current_table[
+            shown_tables[cursor_main[0] + cursor_main[1] - 1]
+        ][cursor_sub[0] + cursor_sub[1] - 2][current_entry_primary_key]
+
+    sql_command = (
+        "UPDATE "
+        + str(shown_tables[cursor_main[0] + cursor_main[1] - 1])
+        + " SET "
+        + str(columns[cursor_sub[2] + cursor_sub[3] - 1][1])
+        + " = "
+        + "NULL"
+        + " WHERE "
+        + str(current_entry_primary_key_name)
+        + "="
+        + str(current_entry_primary_key_id)
+    )
+
+    scr_bottom.addstr(1, 1, str(sql_command))
+    table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(
+        str(sql_command)
+    )
+
+    scr_bottom.refresh()
+
+    time.sleep(1)
+
+    try:
+        Session = sessionmaker(bind=open_database)
+        conn = Session()
+        conn.execute(sql_command)
+        conn.commit()
+        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(
+            str(sql_command)
+        )
+    except:
+        scr_bottom.clear()
+        scr_bottom.addstr(1, 1, "Delete failed")
+        scr_bottom.refresh()
+        time.sleep(1)
+
+    return table_executions
+
+
+def update_database_cell(
+    cursor_main,
+    cursor_sub,
+    columns,
+    shown_tables,
+    current_table,
+    open_database,
+    scr_bottom,
+    scr_dim,
+    table_executions,
+    find_list,
+):
 
     n = 0
 
@@ -184,18 +270,37 @@ def update_database_cell(cursor_main, cursor_sub, columns, shown_tables, current
         else:
             n = n + 1
     if find_list != []:
-        original = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][find_list[cursor_sub[0] - cursor_sub[1] - 2]][cursor_sub[2] + cursor_sub[3] - 1]
+        original = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][
+            find_list[cursor_sub[0] - cursor_sub[1] - 2]
+        ][cursor_sub[2] + cursor_sub[3] - 1]
     else:
-        original = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][cursor_sub[0] - cursor_sub[1] - 2][cursor_sub[2] + cursor_sub[3] - 1]
+        original = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][
+            cursor_sub[0] - cursor_sub[1] - 2
+        ][cursor_sub[2] + cursor_sub[3] - 1]
 
     new_entry = user_input.update_cell(scr_dim, original)
 
     if find_list != []:
-        current_entry_primary_key_id = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][find_list[cursor_sub[0] + cursor_sub[1] - 2]][current_entry_primary_key]
+        current_entry_primary_key_id = current_table[
+            shown_tables[cursor_main[0] + cursor_main[1] - 1]
+        ][find_list[cursor_sub[0] + cursor_sub[1] - 2]][current_entry_primary_key]
     else:
-        current_entry_primary_key_id = current_table[shown_tables[cursor_main[0] + cursor_main[1] - 1]][cursor_sub[0] + cursor_sub[1] - 2][current_entry_primary_key]
+        current_entry_primary_key_id = current_table[
+            shown_tables[cursor_main[0] + cursor_main[1] - 1]
+        ][cursor_sub[0] + cursor_sub[1] - 2][current_entry_primary_key]
     if str(user_input) != " " and str(user_input) != "\n" and str(user_input) != "":
-        sql_command = "UPDATE " + str(shown_tables[cursor_main[0] + cursor_main[1] - 1]) + " SET " + str(columns[cursor_sub[2] + cursor_sub[3] - 1][1]) + " = '" + str(new_entry)[:-1] + "' WHERE " + str(current_entry_primary_key_name) + "=" + str(current_entry_primary_key_id)
+        sql_command = (
+            "UPDATE "
+            + str(shown_tables[cursor_main[0] + cursor_main[1] - 1])
+            + " SET "
+            + str(columns[cursor_sub[2] + cursor_sub[3] - 1][1])
+            + " = '"
+            + str(new_entry)[:-1]
+            + "' WHERE "
+            + str(current_entry_primary_key_name)
+            + "="
+            + str(current_entry_primary_key_id)
+        )
 
     scr_bottom.addstr(1, 1, str(sql_command))
 
@@ -205,7 +310,9 @@ def update_database_cell(cursor_main, cursor_sub, columns, shown_tables, current
         conn.execute(sql_command)
         conn.commit()
 
-        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(str(sql_command))
+        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(
+            str(sql_command)
+        )
 
     except:
         scr_bottom.clear()
@@ -215,13 +322,31 @@ def update_database_cell(cursor_main, cursor_sub, columns, shown_tables, current
 
     return table_executions
 
-def delete_execution(cursor_main, cursor_sub, shown_tables, current_table, table_executions, current_real_database, current_database, open_database):
 
-    execution_entry_position = len(table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])]) - cursor_sub[0] - cursor_sub[1]
+def delete_execution(
+    cursor_main,
+    cursor_sub,
+    shown_tables,
+    current_table,
+    table_executions,
+    current_real_database,
+    current_database,
+    open_database,
+):
 
-    execution_to_remove = table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])][execution_entry_position]
+    execution_entry_position = (
+        len(table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])])
+        - cursor_sub[0]
+        - cursor_sub[1]
+    )
 
-    table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].remove(str(execution_to_remove))
+    execution_to_remove = table_executions[
+        str(shown_tables[cursor_main[0] + cursor_main[1] - 1])
+    ][execution_entry_position]
+
+    table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].remove(
+        str(execution_to_remove)
+    )
 
     open_database.close()
 
@@ -243,7 +368,10 @@ def delete_execution(cursor_main, cursor_sub, shown_tables, current_table, table
 
     return table_executions
 
-def find_database_entry(cursor_main, cursor_sub, columns, shown_tables, current_table, scr_bottom, scr_dim):
+
+def find_database_entry(
+    cursor_main, cursor_sub, columns, shown_tables, current_table, scr_bottom, scr_dim
+):
 
     scr_bottom.clear()
     scr_bottom.refresh()
@@ -279,7 +407,17 @@ def find_database_entry(cursor_main, cursor_sub, columns, shown_tables, current_
 
     return find_list
 
-def new_execution(cursor_main, cursor_sub, table_executions, scr_dim, open_database, scr_show_main, shown_tables, scr_bottom):
+
+def new_execution(
+    cursor_main,
+    cursor_sub,
+    table_executions,
+    scr_dim,
+    open_database,
+    scr_show_main,
+    shown_tables,
+    scr_bottom,
+):
 
     new_execution = user_input.new_execution_input(scr_dim)
 
@@ -289,7 +427,9 @@ def new_execution(cursor_main, cursor_sub, table_executions, scr_dim, open_datab
         conn.execute(new_execution)
         conn.commit()
 
-        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(str(new_execution))
+        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(
+            str(new_execution)
+        )
 
     except:
         scr_bottom.clear()
@@ -299,7 +439,17 @@ def new_execution(cursor_main, cursor_sub, table_executions, scr_dim, open_datab
 
     return table_executions
 
-def new_entry(cursor_main, cursor_sub, table_executions, scr_dim, open_database, scr_bottom, shown_tables, columns):
+
+def new_entry(
+    cursor_main,
+    cursor_sub,
+    table_executions,
+    scr_dim,
+    open_database,
+    scr_bottom,
+    shown_tables,
+    columns,
+):
 
     empty_values = "("
 
@@ -316,13 +466,18 @@ def new_entry(cursor_main, cursor_sub, table_executions, scr_dim, open_database,
             if new_input == "DEFAULT":
                 empty_values = empty_values + new_input + ", "
             elif str(new_input)[:-1] == "now":
-                    empty_values = empty_values + "'" + str(datetime.datetime.now()) + "', "
+                empty_values = empty_values + "'" + str(datetime.datetime.now()) + "', "
             else:
                 empty_values = empty_values + "'" + str(new_input)[:-1] + "', "
 
     empty_values = empty_values[:-2] + ")"
 
-    sql_command = "INSERT INTO " + str(shown_tables[cursor_main[0] + cursor_main[1] - 1]) + " VALUES " + empty_values
+    sql_command = (
+        "INSERT INTO "
+        + str(shown_tables[cursor_main[0] + cursor_main[1] - 1])
+        + " VALUES "
+        + empty_values
+    )
 
     scr_bottom.addstr(1, 1, str(sql_command))
 
@@ -336,18 +491,26 @@ def new_entry(cursor_main, cursor_sub, table_executions, scr_dim, open_database,
         conn.execute(sql_command)
         conn.commit()
 
-        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(str(sql_command))
+        table_executions[str(shown_tables[cursor_main[0] + cursor_main[1] - 1])].append(
+            str(sql_command)
+        )
 
     except:
         scr_bottom.clear()
         scr_bottom.addstr(1, 1, "New entry failed")
         scr_bottom.refresh()
         time.sleep(1)
-   
+
     return table_executions
 
 
-def close_databases(current_real_database, current_database, open_database, table_executions, database_type):
+def close_databases(
+    current_real_database,
+    current_database,
+    open_database,
+    table_executions,
+    database_type,
+):
 
     open_database.close()
 
@@ -367,16 +530,17 @@ def close_databases(current_real_database, current_database, open_database, tabl
 
     os.system("rm " + current_database)
 
+
 def new_user_query(scr_dim, scr_query_main, open_database):
 
     scr_query_main.addstr(1, 1, "Enter new query:    Ctrl-g to enter")
 
-    for line in range(scr_dim[0]-10):
+    for line in range(scr_dim[0] - 10):
         if line < 8:
             line_print = " " + str(line)
         else:
             line_print = str(line)
-        scr_query_main.addstr(line+2, 0, str(line+1))
+        scr_query_main.addstr(line + 2, 0, str(line + 1))
 
     scr_query_main.refresh()
 
@@ -399,18 +563,20 @@ def new_user_query(scr_dim, scr_query_main, open_database):
 
     return new_user_query
 
+
 def favourite_queries():
-    
+
     root_path = os.path.expanduser("~")
 
     try:
         f = open(root_path + "/.sqlcurses/favourite_queries", "r")
-        
+
         fav_qs = f.readlines()
     except:
         fav_qs = []
 
     return fav_qs
+
 
 def delete_fav_query(cursor):
 
@@ -432,6 +598,7 @@ def delete_fav_query(cursor):
         f.write(line.rstrip("\n"))
         f.write("\n")
 
+
 def save_query(user_query):
 
     user_query = user_query + "\n"
@@ -440,6 +607,7 @@ def save_query(user_query):
 
     with open(root_path + "/.sqlcurses/favourite_queries", "a+") as f:
         f.write(user_query)
+
 
 def run_user_query(cursor_main, open_database):
 
@@ -467,4 +635,3 @@ def run_user_query(cursor_main, open_database):
             new_user_query = "000"
 
     return new_user_query
-

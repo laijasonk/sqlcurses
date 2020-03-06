@@ -10,6 +10,7 @@ import curses.textpad as textpad
 
 ## FUNCTIONS ##
 
+
 def cursor_right(cursor, hoz_list, scr_dim):
 
     max_list_length = len(hoz_list)
@@ -17,11 +18,12 @@ def cursor_right(cursor, hoz_list, scr_dim):
     if cursor[2] + cursor[3] < max_list_length - 1:
         cursor[2] = cursor[2] + 1
 
-    if cursor[2]*12+2 > scr_dim[1] - 16:
+    if cursor[2] * 12 + 2 > scr_dim[1] - 16:
         cursor[2] = cursor[2] - 1
         cursor[3] = cursor[3] + 1
 
     return cursor
+
 
 def cursor_left(cursor, hoz_list, scr_dim):
 
@@ -33,6 +35,7 @@ def cursor_left(cursor, hoz_list, scr_dim):
         cursor[3] = cursor[3] - 1
 
     return cursor
+
 
 def cursor_down(cursor, vert_list, scr_dim, cursor_other):
 
@@ -52,6 +55,7 @@ def cursor_down(cursor, vert_list, scr_dim, cursor_other):
 
     return cursor
 
+
 def cursor_up(cursor, vert_list, scr_dim, cursor_other):
 
     if cursor[0] > 0:
@@ -68,6 +72,7 @@ def cursor_up(cursor, vert_list, scr_dim, cursor_other):
             cursor[1] = cursor[1] - 1
 
     return cursor
+
 
 def page_down(cursor, vert_list, scr_dim, cursor_other):
 
@@ -108,16 +113,17 @@ def page_up(cursor, vert_list, scr_dim, cursor_other):
 
 def update_cell(scr_dim, original):
 
-    #curses.start_color()
-    #curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-    new_entry_window = curses.newwin(1, scr_dim[1]-2, scr_dim[0] - 3, 1)
-    #new_entry_window.bkgd(curses.color_pair(1))
+    # curses.start_color()
+    # curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    new_entry_window = curses.newwin(1, scr_dim[1] - 2, scr_dim[0] - 3, 1)
+    # new_entry_window.bkgd(curses.color_pair(1))
     new_entry_box = textpad.Textbox(new_entry_window)
     new_entry_window.addstr(0, 0, str(original), curses.A_REVERSE)
     new_entry_window.refresh()
     new_entry = new_entry_box.edit()
 
     return new_entry
+
 
 def open_new_database(scr_top, scr_dim):
 
@@ -131,6 +137,7 @@ def open_new_database(scr_top, scr_dim):
     new_database = new_database_box.edit()
 
     return new_database
+
 
 def find_column_input(scr_bottom, scr_dim):
 
@@ -155,6 +162,7 @@ def find_value_input(scr_bottom, scr_dim):
 
     return new_value_input
 
+
 def new_execution_input(scr_dim):
 
     new_execution_window = curses.newwin(1, scr_dim[1] - 28, 5, 40)
@@ -164,9 +172,10 @@ def new_execution_input(scr_dim):
 
     return new_execution_input
 
+
 def add_new_row(column, scr_dim, scr_bottom):
 
-    new_row_window = curses.newwin(1, scr_dim[1]-16, scr_dim[0] - 3, 14)
+    new_row_window = curses.newwin(1, scr_dim[1] - 16, scr_dim[0] - 3, 14)
     new_row_box = textpad.Textbox(new_row_window)
     new_row_window.refresh()
     scr_bottom.clear()
@@ -177,9 +186,10 @@ def add_new_row(column, scr_dim, scr_bottom):
 
     return new_row_input
 
+
 def save_database_name(scr_dim, scr_bottom):
 
-    new_save_window = curses.newwin(1, scr_dim[1]-10, scr_dim[0] - 3, 8)
+    new_save_window = curses.newwin(1, scr_dim[1] - 10, scr_dim[0] - 3, 8)
     new_save_box = textpad.Textbox(new_save_window)
     new_save_window.refresh()
     scr_bottom.addstr(0, 1, "Save:", curses.A_REVERSE)
@@ -187,12 +197,13 @@ def save_database_name(scr_dim, scr_bottom):
     curses.curs_set(1)
     new_save_input = new_save_box.edit()
     curses.curs_set(0)
-    
+
     return new_save_input
+
 
 def new_query_input(scr_dim, scr_query_main):
 
-    new_query_window = curses.newwin(scr_dim[0]-10, scr_dim[1]-6, 6, 3)
+    new_query_window = curses.newwin(scr_dim[0] - 10, scr_dim[1] - 6, 6, 3)
     new_query_box = textpad.Textbox(new_query_window)
     new_query_window.refresh()
     new_user_query = new_query_box.edit()
