@@ -73,6 +73,13 @@ def open_top_bar(scr_dim):
 
 def open_front_main(scr_dim):
 
+    """ Load the main front window.
+
+    :param scr_dim: dimensions of the screen
+    :return: curses window
+
+    """
+
     scr_front_main = curses.newwin(scr_dim[0] - 4, scr_dim[1], 4, 0)
 
     if scr_dim[1] > 64:
@@ -132,6 +139,13 @@ def open_front_main(scr_dim):
 
 def open_show_left(scr_dim):
 
+    """ Load the left window.
+
+    :param scr_dim: dimensions of the screen
+    :return: curses window
+
+    """
+
     scr_show_left = curses.newwin(scr_dim[0] - 4 - 3, 16, 4, 0)
 
     scr_show_left.border(0)
@@ -140,6 +154,13 @@ def open_show_left(scr_dim):
 
 
 def open_show_main(scr_dim):
+
+    """ Load the main window.
+
+    :param scr_dim: dimensions of the screen
+    :return: curses window
+
+    """
 
     scr_show_main = curses.newwin(scr_dim[0] - 4 - 3, scr_dim[1] - 16, 4, 16)
 
@@ -150,6 +171,13 @@ def open_show_main(scr_dim):
 
 def open_query_main(scr_dim):
 
+    """ Load the main query window.
+
+    :param scr_dim: dimensions of the screen
+    :return: curses window
+
+    """
+
     scr_query_main = curses.newwin(scr_dim[0] - 4 - 3, scr_dim[1], 4, 0)
 
     scr_query_main.border(0)
@@ -158,6 +186,13 @@ def open_query_main(scr_dim):
 
 
 def open_bottom_bar(scr_dim):
+
+    """ Load the bottom bar.
+
+    :param scr_dim: dimensions of the screen
+    :return: curses window
+
+    """
 
     scr_bottom = curses.newwin(3, scr_dim[1], scr_dim[0] - 3, 0)
 
@@ -175,6 +210,18 @@ def refresh_windows(
     scr_query_main,
 ):
 
+    """ Refreshes each of the main windows. 
+
+    :param current_screen: 
+    :param scr_top: 
+    :param scr_front_main: 
+    :param scr_show_left: 
+    :param scr_show_main: 
+    :param scr_bottom: 
+    :param scr_query_main: 
+
+    """
+
     if current_screen == 1:
         scr_top.refresh()
         scr_front_main.refresh()
@@ -190,9 +237,14 @@ def refresh_windows(
     else:
         scr_top.refresh()
 
+    return None
 
-# sets up .sqlcurses folder
+
 def create_environment():
+
+    """ Sets up the sqlcurses directory
+
+    """
 
     root_path = os.path.expanduser("~")
 
@@ -226,3 +278,5 @@ def create_environment():
             auto_content = "# sqlcurses saved databases\n# Edit manually or save opened database via the app\n# Format:\n# db_short_name database_type:///username:password@host/dbname current_working_directory (for sqlite3)\n# e.g. dev postgresql://johnsmith:test123@localhost/dev_db\n# e.g. devtest sqlite:///devtest.db /home/johnsmith/dbfiles/test1"
             f.write(auto_content)
             f.close()
+
+    return None
