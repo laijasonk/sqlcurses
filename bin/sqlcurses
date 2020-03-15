@@ -19,7 +19,7 @@ import platform
 
 ## IMPORTS ##
 import curses
-import sys, os, time
+import sys, os, time, argparse
 from sqlalchemy import *
 
 import sqlcurses
@@ -28,17 +28,12 @@ from sqlcurses import user_input
 from sqlcurses import curses_fun
 
 if __name__ == "__main__":
-
+    
     ## GLOBALS ##
     x = 1
     last_x = 0
     term_size_change = False
     option_window_open = False
-
-    curses_fun.create_environment()
-
-    scr = curses_fun.init_scr()
-    scr_dim = scr.getmaxyx()
 
     # declarations
     cursor_main = [0, 0, 0, 0]
@@ -63,43 +58,65 @@ if __name__ == "__main__":
     show_query = 0
     updatedData = 1  # if 1, gets new database information
 
-    # Based on what the user inputs
+    # argparse library for parsing arguments
+    parser = argparse.ArgumentParser( description=__doc__ )
+
+    # command line option flags
+    parser.add_argument( '-d', dest='dbname', required=True, help='input database name/file', type=str )
+    parser.add_argument( '-u', dest='username', help='input user name', type=str )
+    parser.add_argument( '-p', dest='password', help='input password', type=str )
+    parser.add_argument( '-H', dest='host', help='hostname', type=str )
+    parser.add_argument( '-P', dest='port', help='port number', type=str )
+    parser.add_argument( '-o', dest='output', help='output database name/file', type=str )
+    parser.add_argument( '-s', dest='socket', help='socket', type=str )
+    parser.add_argument( '-t', dest='dbtype', help='sqlite3, postgres, mariadb, mysql', type=str )
+
+    # command line execution
     if len(sys.argv) == 1:
-        current_database = 0
-        current_screen = 1
-    elif len(sys.argv) >= 2:
-        arguments = len(sys.argv)
-        for n in range(arguments):
-            if sys.argv[n] == "-d":
-                dbname = sys.argv[n + 1]
-                current_real_database = dbname
-                current_database = dbname
-            if sys.argv[n] == "-u":
-                user = sys.argv[n + 1]
-            if sys.argv[n] == "-pd":
-                password = sys.argv[n + 1]
-            if sys.argv[n] == "-h":
-                host = sys.argv[n + 1]
-            if sys.argv[n] == "-p":
-                port = sys.argv[n + 1]
-            if sys.argv[n] == "-o":
-                saved_database = sys.argv[n + 1]
-            if sys.argv[n] == "-s":
-                socket = sys.argv[n + 1]
-                if socket[0] != "/":
-                    socket = "/" + socket
-            if sys.argv[n] == "-t":
-                database_type = sys.argv[n + 1]
-                database_type = database_type.lower()
-                if database_type == "sqlite3":
-                    database_type = "sqlite"
-                if database_type == "postgres":
-                    database_type = "postgresql"
-                if database_type == "mariadb" or database_type == "maria":
-                    database_type = "mysql"
-    else:
-        current_database = 0
-        current_screen = 1
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    args = parser.parse_args()
+
+    # Define variables depending on input arguments
+    current_database = 0
+    current_screen = 1
+    if args.dbname:
+        dbname = args.dbname
+        current_real_database = dbname
+        current_database = dbname
+    if args.username:
+        user = args.username
+    if args.password:
+        password = args.password
+    if args.host:
+        host = args.host
+    if args.port:
+        port = args.port
+    if args.output:
+        saved_database = args.output
+    if args.socket:
+        socket = args.socket
+        if socket[0] != "/":
+            socket = "/" + socket
+    if args.dbtype:
+        database_type = args.dbtype
+        database_type = database_type.lower()
+        if database_type in ["sqlite3", "sqlite"]:
+            database_type = "sqlite"
+        elif database_type in ["postgres", "postresql"]:
+            database_type = "postgresql"
+        elif database_type in ["mariadb", "maria", "mysql"]:
+            database_type = "mysql"
+        else:
+            database_type = "sqlite"
+
+    
+    # Setup environment and initialie screen
+    curses_fun.create_environment()
+    scr = curses_fun.init_scr()
+    scr_dim = scr.getmaxyx()
+
 
     # attempts to open the database
     n = 0
