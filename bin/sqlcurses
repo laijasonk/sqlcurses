@@ -19,155 +19,189 @@ import platform
 
 ## IMPORTS ##
 import curses
-import sys, os, time, argparse
+import sys
+import os
+import time
+import argparse
+import traceback
 from sqlalchemy import *
 
-import sqlcurses
 from sqlcurses import database
 from sqlcurses import user_input
 from sqlcurses import curses_fun
 
-if __name__ == "__main__":
-    
-    ## GLOBALS ##
-    x = 1
-    last_x = 0
-    term_size_change = False
-    option_window_open = False
 
-    # declarations
-    cursor_main = [0, 0, 0, 0]
-    cursor_sub = [0, 0, 0, 0]
-    open_window = 0
-    header_list = ["Struct", "Browse", "Execute"]
-    help_screen = 0
-    find_list = []
-    shown_tables = []
-    table_executions = {}
-    dbname = 0
-    user = 0
-    password = 0
-    host = 0
-    port = 0
-    socket = 0
-    database_type = 0
-    saved_database = 0
-    current_real_database = 0
-    database_dir = 0
-    query_state = 0
-    show_query = 0
-    updatedData = 1  # if 1, gets new database information
+class sqlcurses:
+    def __init__(self, args=None):
+        self.x = 1
+        self.last_x = 0
+        self.term_size_change = False
+        self.option_window_open = False
+
+        # declarations
+        self.cursor_main = [0, 0, 0, 0]
+        self.cursor_sub = [0, 0, 0, 0]
+        self.open_window = 0
+        self.header_list = ["Struct", "Browse", "Execute"]
+        self.help_screen = 0
+        self.find_list = []
+        self.shown_tables = []
+        self.table_executions = {}
+        self.dbname = 0
+        self.user = 0
+        self.password = 0
+        self.host = 0
+        self.port = 0
+        self.socket = 0
+        self.database_type = 0
+        self.saved_database = 0
+        self.current_real_database = 0
+        self.database_dir = 0
+        self.query_state = 0
+        self.show_query = 0
+        self.updatedData = 1  # if 1, gets new database information
+
+        # Define variables depending on input arguments
+        current_database = 0
+        current_screen = 1
+        if args.dbname:
+            self.dbname = args.dbname
+            self.current_real_database = args.dbname
+            self.current_database = args.dbname
+        if args.username:
+            self.user = args.username
+        if args.password:
+            self.password = args.password
+        if args.host:
+            self.host = args.host
+        if args.port:
+            self.port = args.port
+        if args.output:
+            self.saved_database = args.output
+        if args.socket:
+            self.socket = args.socket
+            if self.socket[0] != "/":
+                self.socket = "/" + socket
+        if args.dbtype:
+            self.database_type = args.dbtype
+            self.database_type = self.database_type.lower()
+            if self.database_type in ["sqlite3", "sqlite"]:
+                self.database_type = "sqlite"
+            elif self.database_type in ["postgres", "postresql"]:
+                self.database_type = "postgresql"
+            elif self.database_type in ["mariadb", "maria", "mysql"]:
+                self.database_type = "mysql"
+            else:
+                self.database_type = "sqlite"
+
+        return None
+
+
+if __name__ == "__main__":
 
     # argparse library for parsing arguments
-    parser = argparse.ArgumentParser( description=__doc__ )
+    parser = argparse.ArgumentParser(description=__doc__)
 
     # command line option flags
-    parser.add_argument( '-d', dest='dbname', required=True, help='input database name/file', type=str )
-    parser.add_argument( '-u', dest='username', help='input user name', type=str )
-    parser.add_argument( '-p', dest='password', help='input password', type=str )
-    parser.add_argument( '-H', dest='host', help='hostname', type=str )
-    parser.add_argument( '-P', dest='port', help='port number', type=str )
-    parser.add_argument( '-o', dest='output', help='output database name/file', type=str )
-    parser.add_argument( '-s', dest='socket', help='socket', type=str )
-    parser.add_argument( '-t', dest='dbtype', help='sqlite3, postgres, mariadb, mysql', type=str )
+    parser.add_argument(
+        "-d", dest="dbname", required=True, help="input database name/file", type=str
+    )
+    parser.add_argument("-u", dest="username", help="input user name", type=str)
+    parser.add_argument("-p", dest="password", help="input password", type=str)
+    parser.add_argument("-H", dest="host", help="hostname", type=str)
+    parser.add_argument("-P", dest="port", help="port number", type=str)
+    parser.add_argument("-o", dest="output", help="output database name/file", type=str)
+    parser.add_argument("-s", dest="socket", help="socket", type=str)
+    parser.add_argument(
+        "-t", dest="dbtype", help="sqlite3, postgres, mariadb, mysql", type=str
+    )
 
     # command line execution
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
-
     args = parser.parse_args()
 
-    # Define variables depending on input arguments
-    current_database = 0
-    current_screen = 1
-    if args.dbname:
-        dbname = args.dbname
-        current_real_database = dbname
-        current_database = dbname
-    if args.username:
-        user = args.username
-    if args.password:
-        password = args.password
-    if args.host:
-        host = args.host
-    if args.port:
-        port = args.port
-    if args.output:
-        saved_database = args.output
-    if args.socket:
-        socket = args.socket
-        if socket[0] != "/":
-            socket = "/" + socket
-    if args.dbtype:
-        database_type = args.dbtype
-        database_type = database_type.lower()
-        if database_type in ["sqlite3", "sqlite"]:
-            database_type = "sqlite"
-        elif database_type in ["postgres", "postresql"]:
-            database_type = "postgresql"
-        elif database_type in ["mariadb", "maria", "mysql"]:
-            database_type = "mysql"
-        else:
-            database_type = "sqlite"
+    main = sqlcurses(args)
 
-    
+    x = main.x
+    last_x = main.last_x
+    term_size_change = main.term_size_change
+    option_window_open = main.option_window_open
+    cursor_main = main.cursor_main
+    cursor_sub = main.cursor_sub
+    open_window = main.open_window
+    header_list = main.header_list
+    help_screen = main.help_screen
+    find_list = main.find_list
+    shown_tables = main.shown_tables
+    table_executions = main.table_executions
+    database_dir = main.database_dir
+    query_state = main.query_state
+    show_query = main.show_query
+    updatedData = main.updatedData
+
+    dbname = main.dbname
+    current_real_database = main.current_real_database
+    current_database = main.current_database
+    user = main.user
+    password = main.password
+    host = main.host
+    port = main.port
+    saved_database = main.saved_database
+    socket = main.socket
+    database_type = main.database_type
+
     # Setup environment and initialie screen
     curses_fun.create_environment()
     scr = curses_fun.init_scr()
     scr_dim = scr.getmaxyx()
 
+    try:
+        open_database = database.connect_database(
+            current_real_database,
+            dbname,
+            user,
+            host,
+            password,
+            port,
+            socket,
+            database_type,
+            saved_database,
+        )
+        if open_database == 0:
+            current_screen = 1
+            current_database = 0
+            n = 3
+        else:
+            current_screen = 2
+            n = 3
+            current_database = dbname
+            if saved_database != 0:
+                root_path = os.path.expanduser("~")
+                f = open(root_path + "/.sqlcurses/saved_databases", "r")
 
-    # attempts to open the database
-    n = 0
-    while n < 3:
-        try:
-            open_database = database.connect_database(
-                n,
-                current_real_database,
-                dbname,
-                user,
-                host,
-                password,
-                port,
-                socket,
-                database_type,
-                saved_database,
-            )
-            if open_database == 0:
-                current_screen = 1
-                current_database = 0
-                n = 3
-            else:
-                current_screen = 2
-                n = 3
-                current_database = dbname
-                if saved_database != 0:
-                    root_path = os.path.expanduser("~")
-                    f = open(root_path + "/.sqlcurses/saved_databases", "r")
+                saved_dbs = f.readlines()
+                f.close()
+                length_save_name = len(saved_database)
 
-                    saved_dbs = f.readlines()
-                    f.close()
-                    length_save_name = len(saved_database)
+                # if the user can open it, sets up the relevant info to be used
+                for line in saved_dbs:
+                    if saved_database == line.split(" ")[0]:
+                        sql_connect = line.split(" ")[1]
 
-                    # if the user can open it, sets up the relevant info to be used
-                    for line in saved_dbs:
-                        if saved_database == line.split(" ")[0]:
-                            sql_connect = line.split(" ")[1]
-
-                    database_type = sql_connect.split("//")[0][:-1]
-                    current_database = sql_connect.split("/")[-1]
-                    current_real_database = current_database
-                    if len(sql_connect.split(" ") == 3):
-                        database_dir = sql_connect.split(" ")[2]
-                    else:
-                        database_dir = 0
-        except:
-            # tries to open database 3 times
-            n = n + 1
-            if n == 3:
-                current_screen = 1
-                current_database = 0
+                database_type = sql_connect.split("//")[0][:-1]
+                current_database = sql_connect.split("/")[-1]
+                current_real_database = current_database
+                if len(sql_connect.split(" ") == 3):
+                    database_dir = sql_connect.split(" ")[2]
+                else:
+                    database_dir = 0
+    except Exception as e:
+        curses_fun.term_scr(scr)
+        traceback.print_exc()
+        print(e)
+        sys.exit()
 
     # main loop
     while x != ord("q"):  # quit on "q"
@@ -190,7 +224,7 @@ if __name__ == "__main__":
 
             scr.refresh()
 
-            scr_top.addstr(0, 0, "sqlcurses v0.1.4 - by coffeeandscripts")
+            scr_top.addstr(0, 0, "sqlcurses")
 
             if current_database == 0 or current_database == "0":
                 scr_top.addstr(1, 0, "No open database")
@@ -212,30 +246,29 @@ if __name__ == "__main__":
                     # tries to open the database again 3 times max
                     n = 0
                     if updatedData == 1:
-                        while n < 3:
-                            try:
-                                open_database = database.connect_database(
-                                    n,
-                                    current_real_database,
-                                    dbname,
-                                    user,
-                                    host,
-                                    password,
-                                    port,
-                                    socket,
-                                    database_type,
-                                    saved_database,
-                                )
-                                n = 3
-                                updatedData = 0
-                            except:
-                                n = n + 1
-                                if n == 3:
-                                    # if there is a failure, it exits quickly after closing ncurses
-                                    curses_fun.term_scr(scr)
-                                    print("Critical failure")
-                                    time.sleep(1)
-                                    sys.exit()
+                        try:
+                            open_database = database.connect_database(
+                                current_real_database,
+                                dbname,
+                                user,
+                                host,
+                                password,
+                                port,
+                                socket,
+                                database_type,
+                                saved_database,
+                            )
+                            n = 3
+                            updatedData = 0
+                        except Exception as e:
+                            n = n + 1
+                            if n == 3:
+                                # if there is a failure, it exits quickly after closing ncurses
+                                curses_fun.term_scr(scr)
+                                print("Critical failure")
+                                traceback.print_exc()
+                                print(e)
+                                sys.exit()
 
                     # use [enter] to switch windows
                     if x == 9:  # [enter]
@@ -1172,7 +1205,6 @@ if __name__ == "__main__":
         except Exception as e:
             curses_fun.term_scr(scr)
             print("CRITICAL FAILURE...")
-            import traceback
 
             traceback.print_exc()
             print(e)

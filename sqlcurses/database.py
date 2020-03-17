@@ -15,7 +15,6 @@ from sqlcurses import user_input
 
 
 def connect_database(
-    n,
     current_real_database,
     dbname,
     user,
