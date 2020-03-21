@@ -35,8 +35,6 @@ class sqlcurses:
     def __init__(self, args=None):
         self.x = 1
         self.last_x = 0
-        self.term_size_change = False
-        self.option_window_open = False
 
         # declarations
         self.cursor_main = [0, 0, 0, 0]
@@ -87,12 +85,66 @@ class sqlcurses:
             self.database_type = self.database_type.lower()
             if self.database_type in ["sqlite3", "sqlite"]:
                 self.database_type = "sqlite"
-            elif self.database_type in ["postgres", "postresql"]:
+            elif self.database_type in ["postgres", "postgresql"]:
                 self.database_type = "postgresql"
             elif self.database_type in ["mariadb", "maria", "mysql"]:
                 self.database_type = "mysql"
+        else:
+            self.database_type = "sqlite"
+
+        return None
+
+    def setup_environment(self):
+
+        curses_fun.create_environment()
+        scr = curses_fun.init_scr()
+
+        return scr
+
+    def connect_database(self):
+        try:
+            open_database = database.connect_database(
+                self.current_real_database,
+                self.dbname,
+                self.user,
+                self.host,
+                self.password,
+                self.port,
+                self.socket,
+                self.database_type,
+                self.saved_database,
+            )
+            if open_database == 0:
+                self.current_screen = 1
+                self.current_database = 0
             else:
-                self.database_type = "sqlite"
+                self.current_screen = 2
+                self.current_database = self.dbname
+                if self.saved_database != 0:
+                    root_path = os.path.expanduser("~")
+                    f = open(root_path + "/.sqlcurses/saved_databases", "r")
+
+                    saved_dbs = f.readlines()
+                    f.close()
+
+                    # if the user can open it, sets up the relevant info to be used
+                    for line in saved_dbs:
+                        if self.saved_database == line.split(" ")[0]:
+                            sql_connect = line.split(" ")[1]
+
+                    self.database_type = sql_connect.split("//")[0][:-1]
+                    self.current_database = sql_connect.split("/")[-1]
+                    self.current_real_database = self.current_database
+                    if len(sql_connect.split(" ") == 3):
+                        self.database_dir = sql_connect.split(" ")[2]
+                    else:
+                        self.database_dir = 0
+
+        except Exception as e:
+            curses_fun.term_scr(scr)
+            traceback.print_exc()
+            print(e)
+            sys.exit()
 
         return None
 
@@ -123,11 +175,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main = sqlcurses(args)
+    scr = main.setup_environment()
+    scr_dim = scr.getmaxyx()
+    main.connect_database()
 
     x = main.x
     last_x = main.last_x
-    term_size_change = main.term_size_change
-    option_window_open = main.option_window_open
     cursor_main = main.cursor_main
     cursor_sub = main.cursor_sub
     open_window = main.open_window
@@ -144,6 +197,7 @@ if __name__ == "__main__":
     dbname = main.dbname
     current_real_database = main.current_real_database
     current_database = main.current_database
+    current_screen = main.current_screen
     user = main.user
     password = main.password
     host = main.host
@@ -152,58 +206,8 @@ if __name__ == "__main__":
     socket = main.socket
     database_type = main.database_type
 
-    # Setup environment and initialie screen
-    curses_fun.create_environment()
-    scr = curses_fun.init_scr()
-    scr_dim = scr.getmaxyx()
-
-    try:
-        open_database = database.connect_database(
-            current_real_database,
-            dbname,
-            user,
-            host,
-            password,
-            port,
-            socket,
-            database_type,
-            saved_database,
-        )
-        if open_database == 0:
-            current_screen = 1
-            current_database = 0
-            n = 3
-        else:
-            current_screen = 2
-            n = 3
-            current_database = dbname
-            if saved_database != 0:
-                root_path = os.path.expanduser("~")
-                f = open(root_path + "/.sqlcurses/saved_databases", "r")
-
-                saved_dbs = f.readlines()
-                f.close()
-                length_save_name = len(saved_database)
-
-                # if the user can open it, sets up the relevant info to be used
-                for line in saved_dbs:
-                    if saved_database == line.split(" ")[0]:
-                        sql_connect = line.split(" ")[1]
-
-                database_type = sql_connect.split("//")[0][:-1]
-                current_database = sql_connect.split("/")[-1]
-                current_real_database = current_database
-                if len(sql_connect.split(" ") == 3):
-                    database_dir = sql_connect.split(" ")[2]
-                else:
-                    database_dir = 0
-    except Exception as e:
-        curses_fun.term_scr(scr)
-        traceback.print_exc()
-        print(e)
-        sys.exit()
-
     # main loop
+    term_size_change = False
     while x != ord("q"):  # quit on "q"
         try:
             # check to see if there is a change in terminal size
