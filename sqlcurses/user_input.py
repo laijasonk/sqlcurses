@@ -74,6 +74,7 @@ def cursor_up(cursor, vert_list, scr_dim, cursor_other):
     return cursor
 
 
+# TODO (JKL)
 def page_down(cursor, vert_list, scr_dim, cursor_other):
 
     max_list_length = len(vert_list)
@@ -93,6 +94,7 @@ def page_down(cursor, vert_list, scr_dim, cursor_other):
     return cursor
 
 
+# TODO (JKL)
 def page_up(cursor, vert_list, scr_dim, cursor_other):
 
     if cursor[0] > 0:

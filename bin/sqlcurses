@@ -154,7 +154,7 @@ if __name__ == "__main__":
     # argparse library for parsing arguments
     parser = argparse.ArgumentParser(description=__doc__)
 
-    # command line option flags
+    # Command line option flags
     parser.add_argument(
         "-d", dest="dbname", required=True, help="input database name/file", type=str
     )
@@ -168,17 +168,19 @@ if __name__ == "__main__":
         "-t", dest="dbtype", help="sqlite3, postgres, mariadb, mysql", type=str
     )
 
-    # command line execution
+    # Command line execution
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
     args = parser.parse_args()
 
+    # Connect to the database and setup the curses environment
     main = sqlcurses(args)
     scr = main.setup_environment()
     scr_dim = scr.getmaxyx()
     main.connect_database()
 
+    # Extracted variables (temporary)
     x = main.x
     last_x = main.last_x
     cursor_main = main.cursor_main
@@ -206,7 +208,7 @@ if __name__ == "__main__":
     socket = main.socket
     database_type = main.database_type
 
-    # main loop
+    # Main loop
     term_size_change = False
     while x != ord("q"):  # quit on "q"
         try:
@@ -219,6 +221,7 @@ if __name__ == "__main__":
                 term_size_change == False
             scr_dim = scr.getmaxyx()
 
+            # Setup different windows
             scr_top = curses_fun.open_top_bar(scr_dim)
             scr_front_main = curses_fun.open_front_main(scr_dim)
             scr_show_left = curses_fun.open_show_left(scr_dim)
@@ -226,16 +229,15 @@ if __name__ == "__main__":
             scr_bottom = curses_fun.open_bottom_bar(scr_dim)
             scr_query_main = curses_fun.open_query_main(scr_dim)
 
+            # Refresh screen (?)
             scr.refresh()
 
-            scr_top.addstr(0, 0, "sqlcurses")
+            ## Add label to top
+            #scr_top.addstr(0, 0, "sqlcurses")
 
             if current_database == 0 or current_database == "0":
-                scr_top.addstr(1, 0, "No open database")
+                scr_top.addstr(0, 0, "No open database")
             else:
-                scr_top.addstr(
-                    1, 0, str(database_type) + " - " + str(current_real_database)
-                )
 
                 # for each of the tables, adds up the number of executions
                 execution_length = 0
@@ -243,12 +245,15 @@ if __name__ == "__main__":
                     for execution in table_executions[table]:
                         execution_length = execution_length + 1
 
-                scr_top.addstr(2, 0, str(execution_length) + " changes made")
+                #scr_top.addstr(2, 0, str(execution_length) + " changes made")
+                
+                scr_top.addstr(
+                    0, 0, str(database_type) + " - " + str(current_real_database) + " | " + str(execution_length) + " changes made"
+                )
 
                 if current_database != 0 and current_database != 1:
 
-                    # tries to open the database again 3 times max
-                    n = 0
+                    # tries to open the database
                     if updatedData == 1:
                         try:
                             open_database = database.connect_database(
@@ -262,17 +267,14 @@ if __name__ == "__main__":
                                 database_type,
                                 saved_database,
                             )
-                            n = 3
                             updatedData = 0
                         except Exception as e:
-                            n = n + 1
-                            if n == 3:
-                                # if there is a failure, it exits quickly after closing ncurses
-                                curses_fun.term_scr(scr)
-                                print("Critical failure")
-                                traceback.print_exc()
-                                print(e)
-                                sys.exit()
+                            # if there is a failure, it exits quickly after closing ncurses
+                            curses_fun.term_scr(scr)
+                            print("Critical failure")
+                            traceback.print_exc()
+                            print(e)
+                            sys.exit()
 
                     # use [enter] to switch windows
                     if x == 9:  # [enter]
@@ -854,20 +856,20 @@ if __name__ == "__main__":
             # prints the help on the bottom of the screen based on scr_dim
             if scr_dim[1] > 90:
                 scr_bottom.addstr(
-                    2,
+                    1,
                     2,
                     "[h] Help [Arrows/<>] Move [delete] Back [f] Find [n] New [u] Update [d] Delete [q] Exit",
                     curses.A_REVERSE,
                 )
             elif scr_dim[1] > 40:
                 scr_bottom.addstr(
-                    2,
+                    1,
                     2,
                     "[h] Help [Arrows] Move [k] Queries [q] Exit",
                     curses.A_REVERSE,
                 )
             else:
-                scr_bottom.addstr(2, 2, "[h] Help [q] Exit", curses.A_REVERSE)
+                scr_bottom.addstr(1, 2, "[h] Help [q] Exit", curses.A_REVERSE)
 
             curses_fun.refresh_windows(
                 current_screen,
@@ -882,7 +884,7 @@ if __name__ == "__main__":
             # get the last key
             x = scr.getch()
 
-            # following only occure if the screen shown is table view
+            # following only occurs if the screen shown is table view
             if current_screen != 1:
                 # enter
                 if (x == 10 or x == curses.KEY_ENTER) and current_screen == 2:

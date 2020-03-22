@@ -66,7 +66,8 @@ def open_top_bar(scr_dim):
     """
 
     # format: curses.newwin(nlines, ncols, begin_y, begin_x)
-    scr_top = curses.newwin(4, scr_dim[1], 0, 0)
+    #scr_top = curses.newwin(4, scr_dim[1], 0, 0)
+    scr_top = curses.newwin(0, scr_dim[1], 0, 0)
 
     return scr_top
 
@@ -80,7 +81,8 @@ def open_front_main(scr_dim):
 
     """
 
-    scr_front_main = curses.newwin(scr_dim[0] - 4, scr_dim[1], 4, 0)
+    #scr_front_main = curses.newwin(scr_dim[0] - 4, scr_dim[1], 4, 0)
+    scr_front_main = curses.newwin(scr_dim[0] - 2, scr_dim[1], 2, 0)
 
     if scr_dim[1] > 64:
         scr_front_main.addstr(2, 2, "HELP:")
@@ -146,7 +148,8 @@ def open_show_left(scr_dim):
 
     """
 
-    scr_show_left = curses.newwin(scr_dim[0] - 4 - 3, 16, 4, 0)
+    #scr_show_left = curses.newwin(scr_dim[0] - 2 - 3, 16, 4, 0)
+    scr_show_left = curses.newwin(scr_dim[0] - 2 - 3, 32, 2, 0)
 
     scr_show_left.border(0)
 
@@ -162,7 +165,8 @@ def open_show_main(scr_dim):
 
     """
 
-    scr_show_main = curses.newwin(scr_dim[0] - 4 - 3, scr_dim[1] - 16, 4, 16)
+    #scr_show_main = curses.newwin(scr_dim[0] - 4 - 3, scr_dim[1] - 16, 4, 16)
+    scr_show_main = curses.newwin(scr_dim[0] - 2 - 3, scr_dim[1] - 32, 2, 32)
 
     scr_show_main.border(0)
 
@@ -178,7 +182,8 @@ def open_query_main(scr_dim):
 
     """
 
-    scr_query_main = curses.newwin(scr_dim[0] - 4 - 3, scr_dim[1], 4, 0)
+    #scr_query_main = curses.newwin(scr_dim[0] - 4 - 3, scr_dim[1], 4, 0)
+    scr_query_main = curses.newwin(scr_dim[0] - 2 - 3, scr_dim[1], 2, 0)
 
     scr_query_main.border(0)
 
@@ -194,7 +199,8 @@ def open_bottom_bar(scr_dim):
 
     """
 
-    scr_bottom = curses.newwin(3, scr_dim[1], scr_dim[0] - 3, 0)
+    #scr_bottom = curses.newwin(3, scr_dim[1], scr_dim[0] - 3, 0)
+    scr_bottom = curses.newwin(2, scr_dim[1], scr_dim[0] - 3, 0)
 
     return scr_bottom
 
